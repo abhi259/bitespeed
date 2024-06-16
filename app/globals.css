@@ -31,3 +31,7 @@ body {
     text-wrap: balance;
   }
 }
+.react-flow__node.selected {
+  border-color: #ff0000;
+  box-shadow: 0 0 0 0.5px #555;
+}
