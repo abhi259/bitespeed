@@ -1,28 +1,34 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  addEdge,
   useEdgesState,
   useNodesState,
 } from "reactflow";
 import "reactflow/dist/style.css";
+import { nodeTypes } from "../utils/nodeTypes";
+import shortUUID from "short-uuid";
+import useZustandStore from "@/zustand_store/reactflow_store";
 
 const initialNodes = [
-  { id: "1", position: { x: 0, y: 0 }, data: { label: "1" } },
-  { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
-  { id: "3", position: { x: 0, y: 200 }, data: { label: "3" } },
-  { id: "4", position: { x: 0, y: 300 }, data: { label: "4" } },
-];
-const initialEdges = [
-  { id: "e1-2", source: "1", target: "2" },
-  { id: "e2-3", source: "2", target: "3" },
-  { id: "e3-4", source: "3", target: "4" },
+  {
+    id: "1",
+    position: { x: 0, y: 0 },
+    type: "messageNode",
+    data: { label: "1" },
+  },
 ];
 
+const initialEdges = [];
+
 const ReactFlowMain = () => {
+  const { selectedNode, setSelectedNode } = useZustandStore();
+  const reactFlowWrapper = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -32,17 +38,41 @@ const ReactFlowMain = () => {
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    // console.log("Dragging over ReactFlow");
   }, []);
 
-  const onDrop = useCallback((event) => {
-    event.preventDefault();
-    console.log("Node dropped");
-    console.log("Drop position:", event.clientX, event.clientY);
-  }, []);
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+      const type = event.dataTransfer.getData("application/reactflow");
+
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      setNodes((nds) => {
+        return nds.concat({
+          id: shortUUID.generate(),
+          type,
+          position: position,
+          data: { label: `${type} node` },
+        });
+      });
+    },
+    [reactFlowInstance, setNodes]
+  );
+
+  const onNodeClick = (event, node) => {
+    setSelectedNode(node.id);
+    console.log("selectedNode", selectedNode);
+  };
+
+  const onPaneClick = () => {
+    setSelectedNode(null);
+  };
 
   return (
-    <div className="flex grow w-full h-full ">
+    <div className="flex grow w-full h-full " ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -51,6 +81,11 @@ const ReactFlowMain = () => {
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        nodeTypes={nodeTypes}
+        onInit={setReactFlowInstance}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
+        fitView
       >
         <Controls />
         <MiniMap zoomable pannable />

@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 
-
 const useCountStore = create((set) => ({
-  count: 2,
+  count: null,
   updateCount: (amount) => set((state) => ({ count: state.count + amount })),
 }))
 
