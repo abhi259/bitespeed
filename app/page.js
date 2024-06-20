@@ -16,7 +16,7 @@ export default function Home() {
       <div className="grow">
         <ReactFlowMain />
       </div>
-      <div className="w-[300px] ">
+      <div className="w-[300px] border-l-2">
         {selectedNode == null ? <NodesPanel /> : <SettingsPannel />}
       </div>
     </div>

@@ -11,29 +11,52 @@ import "reactflow/dist/style.css";
 import { nodeTypes } from "../utils/nodeTypes";
 import shortUUID from "short-uuid";
 import useZustandStore from "@/zustand_store/reactflow_store";
+import useReactFlowStore from "@/zustand_store/reactflow_store";
+import { useShallow } from "zustand/react/shallow";
 
-const initialNodes = [
-  {
-    id: "1",
-    position: { x: 0, y: 0 },
-    type: "messageNode",
-    data: { label: "1" },
-  },
-];
+// const initialNodes = [
+//   {
+//     id: "1",
+//     position: { x: 0, y: 0 },
+//     type: "messageNode",
+//     data: { label: "1" },
+//   },
+// ];
 
-const initialEdges = [];
+// const initialEdges = [];
+
+const selector = (state) => ({
+  nodes: state.nodes,
+  edges: state.edges,
+  setNodes: state.setNodes,
+  setEdges: state.setEdges,
+  onNodesChange: state.onNodesChange,
+  onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
+});
 
 const ReactFlowMain = () => {
   const { selectedNode, setSelectedNode } = useZustandStore();
   const reactFlowWrapper = useRef(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+  } = useReactFlowStore(useShallow(selector));
+
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
+  // const onConnect = useCallback(
+  //   (params) => setEdges((eds) => addEdge(params, eds)),
+  //   [setEdges]
+  // );
 
   const onDragOver = useCallback((event) => {
     event.preventDefault();
@@ -50,21 +73,23 @@ const ReactFlowMain = () => {
         y: event.clientY,
       });
 
-      setNodes((nds) => {
-        return nds.concat({
-          id: shortUUID.generate(),
-          type,
-          position: position,
-          data: { label: `${type} node` },
-        });
-      });
+      const newNode = {
+        id: shortUUID.generate(),
+        type: type,
+        position: position,
+        data: { label: `${type} node` },
+      };
+
+      const updatedNodes = [...nodes, newNode];
+
+      setNodes(updatedNodes);
     },
-    [reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes, nodes]
   );
 
   const onNodeClick = (event, node) => {
-    setSelectedNode(node.id);
-    console.log("selectedNode", selectedNode);
+    setSelectedNode(node);
+    console.log(node);
   };
 
   const onPaneClick = () => {
