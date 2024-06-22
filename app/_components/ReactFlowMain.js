@@ -1,29 +1,10 @@
 import React, { useCallback, useRef, useState } from "react";
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
-  addEdge,
-  useEdgesState,
-  useNodesState,
-} from "reactflow";
+import ReactFlow, { Background, Controls, MiniMap } from "reactflow";
 import "reactflow/dist/style.css";
 import { nodeTypes } from "../utils/nodeTypes";
 import shortUUID from "short-uuid";
-import useZustandStore from "@/zustand_store/reactflow_store";
 import useReactFlowStore from "@/zustand_store/reactflow_store";
 import { useShallow } from "zustand/react/shallow";
-
-// const initialNodes = [
-//   {
-//     id: "1",
-//     position: { x: 0, y: 0 },
-//     type: "messageNode",
-//     data: { label: "1" },
-//   },
-// ];
-
-// const initialEdges = [];
 
 const selector = (state) => ({
   nodes: state.nodes,
@@ -33,39 +14,39 @@ const selector = (state) => ({
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
+  setSelectedNode: state.setSelectedNode,
 });
 
 const ReactFlowMain = () => {
-  const { selectedNode, setSelectedNode } = useZustandStore();
   const reactFlowWrapper = useRef(null);
-  // const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  // const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const {
     nodes,
     edges,
     setNodes,
-    setEdges,
     onNodesChange,
     onEdgesChange,
     onConnect,
+    setSelectedNode,
   } = useReactFlowStore(useShallow(selector));
 
+
+  // reactFlowInstance is needed to get the drag position from the refrence of the reactflow origin instead of component origin refrence
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-  // const onConnect = useCallback(
-  //   (params) => setEdges((eds) => addEdge(params, eds)),
-  //   [setEdges]
-  // );
 
+  // this I did not understand this but apparently onDragOver is required to allow drag and drop without which onDrop does not work
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
+  
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
+
+      // here we get the type of the node from drag and drop from  nodesPannel component 
       const type = event.dataTransfer.getData("application/reactflow");
 
       const position = reactFlowInstance.screenToFlowPosition({
@@ -77,23 +58,36 @@ const ReactFlowMain = () => {
         id: shortUUID.generate(),
         type: type,
         position: position,
-        data: { label: `${type} node` },
+        data: { label: `${type} node`, message: null },
       };
-
       const updatedNodes = [...nodes, newNode];
-
       setNodes(updatedNodes);
     },
     [reactFlowInstance, setNodes, nodes]
   );
 
   const onNodeClick = (event, node) => {
+    // gives us the selected node in the states zustand store to be used in other components
     setSelectedNode(node);
-    console.log(node);
   };
 
   const onPaneClick = () => {
+    // Reset selected node 
     setSelectedNode(null);
+  };
+
+  const isValidConnection = (connection) => {
+    const { source, sourceHandle } = connection;
+    // Get all edges
+    const edges = reactFlowInstance.getEdges();
+
+    // Check if there's already an edge from this source handle
+    const existingEdge = edges.find(
+      (edge) => edge.source === source && edge.sourceHandle === sourceHandle
+    );
+    // showWarningToast("Can only have one edge originating from a source handle");
+    // Return false if an edge already exists, true otherwise
+    return !existingEdge;
   };
 
   return (
@@ -110,6 +104,7 @@ const ReactFlowMain = () => {
         onInit={setReactFlowInstance}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        isValidConnection={isValidConnection}
         fitView
       >
         <Controls />

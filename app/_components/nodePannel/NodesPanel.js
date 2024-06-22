@@ -5,6 +5,8 @@ import VideoCameraBackIcon from "@mui/icons-material/VideoCameraBack";
 
 const NodesPanel = () => {
   const onDragStart = (event, nodeType) => {
+
+    // datatransfer event is used here to pass data by draging from one component to another
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
   };
@@ -13,7 +15,7 @@ const NodesPanel = () => {
     <div className=" flex flex-col gap-4 justify-center items-center py-5">
       {customNodes.map((item) => (
         <div
-          className=" flex  items-center w-[200px] border-2 rounded-md border-white p-4 "
+          className=" flex  items-center w-[200px] border-2 rounded-md border-white p-4 transition duration-300 hover:scale-110"
           onDragStart={(event) => onDragStart(event, item.type)}
           key={item.id}
           draggable

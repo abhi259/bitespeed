@@ -1,31 +1,19 @@
-// import { create } from "zustand";
-
-// const useZustandStore = create((set) => ({
-//   selectedNode: null,
-//   setSelectedNode: (prop) => set((state) => ({ selectedNode: prop })),
-// }));
-
-// export default useZustandStore;
-
 const initialNodes = [
-  {
-    id: "1",
-    position: { x: 0, y: 0 },
-    type: "messageNode",
-    data: { label: "1" },
-  },
+
 ];
 
-const initialEdges = [];
+const initialEdges = [
+
+];
 
 import { create } from "zustand";
 import { addEdge, applyNodeChanges, applyEdgeChanges } from "reactflow";
-// import initialNodes from "./nodes";
-// import initialEdges from "./edges";
 
 const useReactFlowStore = create((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
+  selectedNode: null,
+
   onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
@@ -46,6 +34,18 @@ const useReactFlowStore = create((set, get) => ({
   },
   setEdges: (edges) => {
     set({ edges });
+  },
+  setSelectedNode: (prop) => set((state) => ({ selectedNode: prop })),
+
+  updateNodeData: ({ nodeId, message }) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          node.data = { ...node.data, message };
+        }
+        return node;
+      }),
+    });
   },
 }));
 
