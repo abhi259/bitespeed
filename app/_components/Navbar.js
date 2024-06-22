@@ -1,6 +1,6 @@
 "use client";
 
-import useReactFlowStore from "@/zustand_store/reactflow_store";
+import useReactFlowStore from "@/app/zustand_store/reactflow_store";
 import React from "react";
 import { useShallow } from "zustand/react/shallow";
 import { showErrorToast, showSuccessToast } from "../utils/toastMessages";
@@ -14,8 +14,7 @@ const Navbar = () => {
   const { nodes, edges } = useReactFlowStore(useShallow(selector));
 
   const handleSave = () => {
-
-    // this might be wrong but if edges.length is >= nodes.length-1 that means all the nodes have been connected to atleast one other node. 
+    // this might be wrong but if edges.length is >= nodes.length-1 that means all the nodes have been connected to atleast one other node.
     if (nodes.length > 0 && edges.length >= nodes.length - 1) {
       showSuccessToast("Saved Successfully");
     } else {

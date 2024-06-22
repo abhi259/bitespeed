@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import useReactFlowStore from "@/zustand_store/reactflow_store";
+import useReactFlowStore from "@/app/zustand_store/reactflow_store";
 import { useShallow } from "zustand/react/shallow";
 
 const SettingsPannel = () => {
-
-  // selector helps in optimizing the zustand statemanagement 
+  // selector helps in optimizing the zustand statemanagement
   const selector = (state) => ({
     nodes: state.nodes,
     edges: state.edges,
@@ -16,10 +15,9 @@ const SettingsPannel = () => {
     updateNodeData: state.updateNodeData,
   });
 
-  const {
-    selectedNode,
-    updateNodeData,
-  } = useReactFlowStore(useShallow(selector));
+  const { selectedNode, updateNodeData } = useReactFlowStore(
+    useShallow(selector)
+  );
 
   const [text, setText] = React.useState("");
 
@@ -29,12 +27,10 @@ const SettingsPannel = () => {
     updateNodeData({ nodeId: selectedNode.id, message: updatedText });
   };
 
-
   //this useEffect here handles the text update based on the selected node in this settings pannel
   useEffect(() => {
     setText(selectedNode.data.message);
   }, [selectedNode.data.message]);
-
 
   return (
     <div className="flex flex-col ">

@@ -5,7 +5,7 @@ import React from "react";
 import "reactflow/dist/style.css";
 import NodesPanel from "./_components/nodePannel/NodesPanel";
 import ReactFlowMain from "./_components/ReactFlowMain";
-import useZustandStore from "@/zustand_store/reactflow_store";
+import useZustandStore from "@/app/zustand_store/reactflow_store";
 import SettingsPannel from "./_components/nodePannel/SettingsPannel";
 
 export default function Home() {

@@ -3,7 +3,7 @@ import ReactFlow, { Background, Controls, MiniMap } from "reactflow";
 import "reactflow/dist/style.css";
 import { nodeTypes } from "../utils/nodeTypes";
 import shortUUID from "short-uuid";
-import useReactFlowStore from "@/zustand_store/reactflow_store";
+import useReactFlowStore from "@/app/zustand_store/reactflow_store";
 import { useShallow } from "zustand/react/shallow";
 
 const selector = (state) => ({
@@ -30,10 +30,8 @@ const ReactFlowMain = () => {
     setSelectedNode,
   } = useReactFlowStore(useShallow(selector));
 
-
   // reactFlowInstance is needed to get the drag position from the refrence of the reactflow origin instead of component origin refrence
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-
 
   // this I did not understand this but apparently onDragOver is required to allow drag and drop without which onDrop does not work
   const onDragOver = useCallback((event) => {
@@ -41,12 +39,11 @@ const ReactFlowMain = () => {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
 
-      // here we get the type of the node from drag and drop from  nodesPannel component 
+      // here we get the type of the node from drag and drop from  nodesPannel component
       const type = event.dataTransfer.getData("application/reactflow");
 
       const position = reactFlowInstance.screenToFlowPosition({
@@ -72,7 +69,7 @@ const ReactFlowMain = () => {
   };
 
   const onPaneClick = () => {
-    // Reset selected node 
+    // Reset selected node
     setSelectedNode(null);
   };
 
